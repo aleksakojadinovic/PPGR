@@ -18,6 +18,7 @@ class Utils:
   Y_AXIS = [0, 1, 0]
   Z_AXIS = [0, 0, 1]
   ### Konvertuje tacku iz homogenih u afine koordinate
+  @staticmethod
   def to_affine(p):
     if len(p) < 2 or len(p) > 3:
       raise ValueError(f'[to_affine] {p} is not a valid point.')
@@ -29,6 +30,7 @@ class Utils:
                      1.0*p[1]/p[2]])
 
   ### Konvertuje tacke iz afinih u homogene koordinate
+  @staticmethod
   def to_homog(p):
     if len(p) < 2 or len(p) > 3:
       raise ValueError(f'[to_affine] {p} is not a valid point.')
@@ -37,35 +39,43 @@ class Utils:
     return np.array([p[0], p[1], 1], dtype='float32')
 
   ### Vraca jedinicni vektor od datog vektora
+  @staticmethod
   def to_unit(v):
     v = np.array(v, dtype='float32')
     mag = la.norm(v)
     return v/mag
 
   ### Row to column
+  @staticmethod
   def rtoc(r):
     return np.array([[r[0]],
                      [r[1]],
                      [r[2]]], dtype='float32')
 
+  @staticmethod
   def assert_orth_and_det1(A):
     return np.isclose(la.det(A), 1.0) and np.isclose(A @ A.T,
                                                      np.identity(3)).all()
 
+  @staticmethod
   def assert_orth(A):
     return np.isclose(A @ A.T, np.identity(3)).all()
 
+  @staticmethod
   def assert_det1(A):
     return np.isclose(la.det(A), 1.0)
 
+  @staticmethod
   def assert_meas(m):
     return m in ['degrees', 'radians']
 
   ### Column to row
+  @staticmethod
   def ctor(c):
     return np.array([c[0][0], c[1][0], c[2][0]], dtype='float32')
 
   ### Vraca proizvoljan vektor normalan na vektor v
+  @staticmethod
   def get_normal(v):
     v = np.array(v, dtype='float32')
     if (v == 0).all():
@@ -80,6 +90,7 @@ class Utils:
 
 class PPGR3:
   ### Matrica rotacije oko orijentisane prave p za ugao fi
+  @staticmethod
   def rodriguez(p,
                 fi,
                 measure='radians'):
@@ -101,6 +112,7 @@ class PPGR3:
     return ppt + c*(np.identity(n=3) - ppt) + s*px
 
   ### Konvertuje Ojlerove uglove u matricu rotacije
+  @staticmethod
   def Euler2A(angleX, angleY, angleZ, measure='radians'):       
     Rx = PPGR3.rodriguez(p=Utils.X_AXIS, 
                          fi=angleX,
@@ -114,6 +126,7 @@ class PPGR3:
     return Rz @ Ry @ Rx 
 
   ### Za datu matricu A nalazi p i phi tako da je A = Rot_p(phi)
+  @staticmethod
   def AxisAngle(A, measure='radians'):
     if not Utils.assert_meas(measure):
       raise ValueError(f'[AxisAngle] Unknown measure {measure}')
@@ -145,6 +158,7 @@ class PPGR3:
     return p, phi
 
   ### Za datu matricu A nalazi Ojlerove uglove
+  @staticmethod
   def A2Euler(A, measure='radians'):
     if not Utils.assert_meas(measure):
       raise ValueError(f'[A2Euler] Unknown measure {measure}')
@@ -185,6 +199,7 @@ class PPGR3:
 
   ### Za datu osu p i ugao phi vraca kvaternion q tako da je
   ### Cq = Rp(phi)
+  @staticmethod
   def AxisAngle2Q(p, phi, measure='radians'):
     if not Utils.assert_meas(measure):
       raise ValueError(f'[AxisAngle2Q] Unknown measure {measure}')
@@ -196,6 +211,7 @@ class PPGR3:
     x, y, z = np.sin(phi/2)*p
     return np.array([x, y, z, w])
 
+  @staticmethod
   def Q2AxisAngle(q, measure='radians'):
     if not Utils.assert_meas(measure):
       raise ValueError(f'[Q2AxisAngle] Unknown measure {measure}')
@@ -213,10 +229,12 @@ class PPGR3:
     else:
       p = Utils.to_unit([x, y, z])
 
+    if measure == 'degrees':
+      phi = np.rad2deg(measure)
     return p, phi
 
-### DATI TEST PRIMERI
 class Examples:
+  @staticmethod
   def run_example_series(angleX,
                          angleY,
                          angleZ,
@@ -247,16 +265,4 @@ class Examples:
     print(f'(6) Q2AxisAngle:')
     print(f'p={p2}, phi={phi2}')
 
-### TEST PRIMERI DATI U DOMACEM:
-EX_ANGLE_X = -np.arctan(1.0/4)
-EX_ANGLE_Y = -np.arcsin(8.0/9)
-EX_ANGLE_Z = np.arctan(4.0)
-Examples.run_example_series(EX_ANGLE_X, EX_ANGLE_Y, EX_ANGLE_Z, 'Dati test primer')
 
-ANGLE_X = np.arcsin(np.sqrt(3)/2)
-ANGLE_Y = np.arccos(np.sqrt(3)/2)
-ANGLE_Z = np.arctan(np.sqrt(2)/2)
-Examples.run_example_series(ANGLE_X,
-                            ANGLE_Y,
-                            ANGLE_Z,
-                            tag='Originalni test primer')
