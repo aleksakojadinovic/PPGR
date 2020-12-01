@@ -233,15 +233,33 @@ class Loader:
 
     @staticmethod
     def load_from_file(filepath):
-        # try:
-        with open(filepath) as fp:
-            return Loader.parse_content(fp.read().splitlines())
-        # except:
-        #     print('Failed to parse input file.')
-        #     sys.exit(1)
+        try:
+            with open(filepath) as fp:
+                return Loader.parse_content(fp.read().splitlines())
+        except:
+            print('Failed to parse input file.')
+            sys.exit(1)
+
+    @staticmethod
+    def initialize_everything(os, oe, cs, ce):
+        os1, os2, os3 = os
+        oe1, oe2, oe3 = oe
+
+        ballStart = AnimBall(pos=cs,
+                            aa=list(PPGR3.AxisAngle(PPGR3.Euler2A(os1, os2, os3))),
+                            in_measure='radians')
     
+        ballEnd   = AnimBall(pos=ce,
+                            aa=list(PPGR3.AxisAngle(PPGR3.Euler2A(oe1, oe2, oe3))),
+                            in_measure='radians')
 
+        ballCurrent = ballStart.copy()
 
+        Objects.BALL_START = ballStart
+        Objects.BALL_END   = ballEnd
+        Objects.BALL_CURR  = ballCurrent
+        Objects.Q_START    = PPGR3.AxisAngle2Q(ballStart.p(), ballStart.phirad())
+        Objects.Q_END      = PPGR3.AxisAngle2Q(ballEnd.p(), ballEnd.phirad())
 
 def main():
     if len(sys.argv) < 2:
@@ -257,7 +275,7 @@ def main():
         os, oe, cs, ce = Loader.load_from_file(sys.argv[1])
     
 
-    initialize_everything(os, oe, cs, ce)
+    Loader.initialize_everything(os, oe, cs, ce)
     print('Press S to start/pause the animation')
 
     glutInit(sys.argv)
@@ -280,25 +298,7 @@ def main():
     glutMainLoop()
     return
 
-def initialize_everything(os, oe, cs, ce):
-    os1, os2, os3 = os
-    oe1, oe2, oe3 = oe
 
-    ballStart = AnimBall(pos=cs,
-                        aa=list(PPGR3.AxisAngle(PPGR3.Euler2A(os1, os2, os3))),
-                        in_measure='radians')
-   
-    ballEnd   = AnimBall(pos=ce,
-                        aa=list(PPGR3.AxisAngle(PPGR3.Euler2A(oe1, oe2, oe3))),
-                        in_measure='radians')
-
-    ballCurrent = ballStart.copy()
-
-    Objects.BALL_START = ballStart
-    Objects.BALL_END   = ballEnd
-    Objects.BALL_CURR  = ballCurrent
-    Objects.Q_START    = PPGR3.AxisAngle2Q(ballStart.p(), ballStart.phirad())
-    Objects.Q_END      = PPGR3.AxisAngle2Q(ballEnd.p(), ballEnd.phirad())
     
 
 main()
