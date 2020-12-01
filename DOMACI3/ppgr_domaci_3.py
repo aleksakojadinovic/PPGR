@@ -65,10 +65,6 @@ class Utils:
   def assert_det1(A):
     return np.isclose(la.det(A), 1.0)
 
-  @staticmethod
-  def assert_meas(m):
-    return m in ['degrees', 'radians']
-
   ### Column to row
   @staticmethod
   def ctor(c):
@@ -91,14 +87,7 @@ class Utils:
 class PPGR3:
   ### Matrica rotacije oko orijentisane prave p za ugao fi
   @staticmethod
-  def rodriguez(p,
-                fi,
-                measure='radians'):
-    if not Utils.assert_meas(measure):
-      raise ValueError(f'[rodriguez] Unknown measure {measure}')
-    if measure == 'degrees':
-      fi = np.deg2rad(fi)
-
+  def rodriguez(p, fi):
     p = np.array(p)  
     if p.shape == (3, ):
       p = Utils.rtoc(p)
@@ -113,26 +102,19 @@ class PPGR3:
 
   ### Konvertuje Ojlerove uglove u matricu rotacije
   @staticmethod
-  def Euler2A(angleX, angleY, angleZ, measure='radians'):       
+  def Euler2A(angleX, angleY, angleZ):       
     Rx = PPGR3.rodriguez(p=Utils.X_AXIS, 
-                         fi=angleX,
-                         measure=measure)
+                         fi=angleX)
     Ry = PPGR3.rodriguez(p=Utils.Y_AXIS,
-                         fi=angleY,
-                         measure=measure)
+                         fi=angleY)
     Rz = PPGR3.rodriguez(p=Utils.Z_AXIS,
-                         fi=angleZ,
-                         measure=measure)
+                         fi=angleZ)
     return Rz @ Ry @ Rx 
 
   ### Za datu matricu A nalazi p i phi tako da je A = Rot_p(phi)
   @staticmethod
-  def AxisAngle(A, measure='radians'):
-    if not Utils.assert_meas(measure):
-      raise ValueError(f'[AxisAngle] Unknown measure {measure}')
+  def AxisAngle(A):
     A = np.array(A, dtype='float32')
-    # if not Utils.assert_orth(A):
-    #   raise ValueError(f'[AxisAngle] The matrix must be orthogonal.')
     if not Utils.assert_det1(A):
       raise ValueError(f'[AxisAngle] The determinant must be 1.')
     M = A - np.identity(3)
@@ -152,19 +134,12 @@ class PPGR3:
     phi = np.arccos(np.dot(u, up))
     if np.dot(np.cross(u, up), p) < 0:
       p = -p
-    
-    if measure == 'degrees':
-      phi = np.rad2deg(phi)
     return p, phi
 
   ### Za datu matricu A nalazi Ojlerove uglove
   @staticmethod
-  def A2Euler(A, measure='radians'):
-    if not Utils.assert_meas(measure):
-      raise ValueError(f'[A2Euler] Unknown measure {measure}')
+  def A2Euler(A):
     A = np.array(A, dtype='float32')
-    # if not Utils.assert_orth(A):
-    #   raise ValueError(f'[A2Euler] The matrix must be orthogonal.')
     if not Utils.assert_det1(A):
       raise ValueError(f'[A2Euler] The determinant must be 1.')
       
@@ -191,20 +166,13 @@ class PPGR3:
       angle1 = np.arctan2(-a12, a22)
       angle2 = -np.pi/2
       angle3 = 0
-    
-    if measure == 'degrees':
-      angle1, angle2, angle3 = np.rad2deg(angle1), np.rad2deg(angle2), np.rad2deg(angle3)
 
     return angle3, angle2, angle1
 
   ### Za datu osu p i ugao phi vraca kvaternion q tako da je
   ### Cq = Rp(phi)
   @staticmethod
-  def AxisAngle2Q(p, phi, measure='radians'):
-    if not Utils.assert_meas(measure):
-      raise ValueError(f'[AxisAngle2Q] Unknown measure {measure}')
-    if measure == 'degrees':
-      phi = np.deg2rad(phi)
+  def AxisAngle2Q(p, phi):
     p = np.array(p, dtype='float32')
     w = np.cos(phi/2)
     p = Utils.to_unit(p)
@@ -212,9 +180,7 @@ class PPGR3:
     return np.array([x, y, z, w])
 
   @staticmethod
-  def Q2AxisAngle(q, measure='radians'):
-    if not Utils.assert_meas(measure):
-      raise ValueError(f'[Q2AxisAngle] Unknown measure {measure}')
+  def Q2AxisAngle(q):
     q = np.array(q, dtype='float32')
     q = Utils.to_unit(q)
     x, y, z, w = q
@@ -228,9 +194,6 @@ class PPGR3:
       p = np.array([1, 0, 0])
     else:
       p = Utils.to_unit([x, y, z])
-
-    if measure == 'degrees':
-      phi = np.rad2deg(measure)
     return p, phi
 
 class Examples:
