@@ -71,7 +71,7 @@ class AnimUtils:
     def line_inter(P_START, P_END, t, tm):
         t = float(t)
         tm = float(tm)
-        return P_START + (t/tm)*P_END
+        return (1-(t/tm))*P_START + (t/tm)*P_END
 
 class Constants:
     SP_STACKS = 20
@@ -124,7 +124,7 @@ class AnimBall:
 
 class AnimationInfo:
     ANIMATION_ON = False
-    ANIMATION_TIME = 0.0
+    ANIMATION_T = 0.0
     ANIMATION_MAX = 1.0
     ANIMATION_DT = 0.01
     TIMER_REFRESH = 20
@@ -134,20 +134,20 @@ class CallBacks:
     def timer_callback(val):
         global AnimationInfo
         global OBJECTS
-        AnimationInfo.ANIMATION_TIME += AnimationInfo.ANIMATION_DT
+        AnimationInfo.ANIMATION_T += AnimationInfo.ANIMATION_DT
 
-        if AnimationInfo.ANIMATION_TIME > AnimationInfo.ANIMATION_MAX:
-            AnimationInfo.ANIMATION_TIME = 0.0
+        if AnimationInfo.ANIMATION_T > AnimationInfo.ANIMATION_MAX:
+            AnimationInfo.ANIMATION_T = 0.0
 
         currQ = AnimUtils.slerp(Objects.Q_START,
                                 Objects.Q_END,
-                                AnimationInfo.ANIMATION_TIME, AnimationInfo.ANIMATION_MAX)
+                                AnimationInfo.ANIMATION_T, AnimationInfo.ANIMATION_MAX)
         newp, newphi = PPGR3.Q2AxisAngle(currQ)
         newphi = np.rad2deg(newphi)
         Objects.BALL_CURR.aa = [newp, newphi]
         Objects.BALL_CURR.pos = AnimUtils.line_inter(Objects.BALL_START.pos,
                                                      Objects.BALL_END.pos,
-                                                     AnimationInfo.ANIMATION_TIME,
+                                                     AnimationInfo.ANIMATION_T,
                                                      AnimationInfo.ANIMATION_MAX)
             
         glutPostRedisplay()
@@ -222,7 +222,7 @@ class Loader:
     @staticmethod
     def parse_content(content):
         if len(content) != 4:
-            print(f'Expected format:\n[deg\rad] anglestartX angleStartY angleStartZ\n[deg\rad] angleEndX angleEndY angleEndZ\npointStartX pointStartY pointStartZ\npointEndX pointEndY pointEndZ')
+            print(f'Expected format:\n[deg/rad] anglestartX angleStartY angleStartZ\n[deg/rad] angleEndX angleEndY angleEndZ\npointStartX pointStartY pointStartZ\npointEndX pointEndY pointEndZ')
             sys.exit(1)
 
         anglestart =   Loader.parse_angle(content[0])
@@ -241,7 +241,7 @@ class Loader:
             sys.exit(1)
 
     @staticmethod
-    def initialize_everything(os, oe, cs, ce):
+    def initialize_inputs(os, oe, cs, ce):
         os1, os2, os3 = os
         oe1, oe2, oe3 = oe
 
@@ -273,9 +273,10 @@ def main():
             sys.exit(1)
     else:
         os, oe, cs, ce = Loader.load_from_file(sys.argv[1])
+        
     
 
-    Loader.initialize_everything(os, oe, cs, ce)
+    Loader.initialize_inputs(os, oe, cs, ce)
     print('Press S to start/pause the animation')
 
     glutInit(sys.argv)
@@ -297,8 +298,5 @@ def main():
     glPushMatrix()
     glutMainLoop()
     return
-
-
-    
 
 main()
