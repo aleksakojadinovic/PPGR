@@ -84,31 +84,9 @@ used_points_right = np.array(used_points_right)
 all_points_left = np.array([np.array(p, dtype='float32') for p in all_points_left])
 all_points_right = np.array([np.array(p, dtype='float32') for p in all_points_right])
 
-# pointsleft, pointsright - uparene tacke
-points_left = [all_points_left[0],
-               all_points_left[1],
-               all_points_left[2],
-               all_points_left[3],
-               all_points_left[5],
-               all_points_left[6],
-               all_points_left[8],
-               all_points_left[9]]
-
-points_right = [all_points_right[0],
-               all_points_right[1],
-               all_points_right[2],
-               all_points_right[3],
-               all_points_right[5],
-               all_points_right[6],
-               all_points_right[8],
-               all_points_right[9]]
-points_left = np.array(points_left)
-points_right = np.array(points_right)
-
 # jos treba naci nevidljive tacke
 # za levu sliku to su x[7], x[15], x[23]
 # np.cross(np.cross( ), points_left[3])
-
 
 all_points_left[7] = to_pixel_coords(
                     the_cross(all_points_left[0],
@@ -184,8 +162,8 @@ all_points_right[20] = to_pixel_coords(
                   all_points_right[19],
                   all_points_right[21]))
 
-print('LEVA \t--> DESNA: ', '==================================', sep='\n')
-print('\n'.join([f'{(a[0], a[1], a[2])} \t--> {(b[0], b[1], b[2])}' for a, b in zip(points_left, points_right)]))
+print('LEFT \t--> RIGHT: ', '==================================', sep='\n')
+print('\n'.join([f'{(a[0], a[1], a[2])} \t--> {(b[0], b[1], b[2])}' for a, b in zip(used_points_left, used_points_right)]))
 
 def to_affine(x):
     return (x/x[-1])[:-1]
@@ -231,11 +209,6 @@ def get_triang_eq(xx, yy, T1, T2):
     return np.array([xx[1]*T1[2] - xx[2]*T1[1], -xx[0]*T1[2] + xx[2]*T1[0], yy[1]*T2[2] - yy[2]*T2[1], -yy[0]*T2[2] + yy[2]*T2[0]])
 
 def get_3d_rec(xx, yy, T1, T2):
-    # print(f'Pokrenuto za {xx, yy}')
-    # print(f'get_triang_eq(xx, yy, T1, T2) = {get_triang_eq(xx, yy, T1, T2)}')
-    # print(f'la.svd(get_triang_eq(xx, yy, T1, T2)) = {la.svd(get_triang_eq(xx, yy, T1, T2))}')
-    # print(f'la.svd(get_triang_eq(xx, yy, T1, T2))[-1][-1] = {la.svd(get_triang_eq(xx, yy, T1, T2))[-1][-1]}')
-    # print(f'to_affine(la.svd(get_triang_eq(xx, yy, T1, T2))[-1][-1]) = {to_affine(la.svd(get_triang_eq(xx, yy, T1, T2))[-1][-1])}')
     return to_affine(la.svd(get_triang_eq(xx, yy, T1, T2))[-1][-1])
 
 system = get_f_system(used_points_left, used_points_right)
@@ -254,21 +227,6 @@ T2 = get_T2(ff, e2)
 reconstructed = [get_3d_rec(x, y, T1, T2) for x, y in zip(all_points_left, all_points_right)]
 reconstructed_norm_mult = [muln(x, 400) for x in reconstructed]
 reconstructed_norm_mult
-# print(reconstructed_norm_mult)
-
-# list(reconstructed_norm_mult)
-
-
-
-# reconstructed400[0]/reconstructed400[0][2]
-# reconstructed400 = [r/r[2] for r in reconstructed]
-# reconstructed400 = np.round(reconstructed)
-
-
-# reconstructed = [get_3d_rec(x, y, T1, T2) for x, y in zip(all_points_left, all_points_right)]
-# reconstructed = np.array(reconstructed)
-
-# reconstructed = to_pixel_coords(reconstructed)
 
 fig = plt.figure(figsize=(7, 7))
 ax = Axes3D(fig)
@@ -324,8 +282,5 @@ plot_line(11, 15, c=color)
 plot_line(12, 16, c=color)
 
 
-
-# ?ax.plot
-
 fig.show()
-xqqq = input('')
+input('Any key to exit...')
